@@ -1,0 +1,52 @@
+\doxysection{src/main.c File Reference}
+\hypertarget{main_8c}{}\label{main_8c}\index{src/main.c@{src/main.c}}
+{\ttfamily \#include $<$logging/log.\+h$>$}\newline
+{\ttfamily \#include $<$net/coap.\+h$>$}\newline
+{\ttfamily \#include $<$net/golioth/system\+\_\+client.\+h$>$}\newline
+{\ttfamily \#include $<$net/golioth/wifi.\+h$>$}\newline
+{\ttfamily \#include $<$drivers/sensor.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$zephyr.\+h$>$}\newline
+{\ttfamily \#include $<$device.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$sys/printk.\+h$>$}\newline
+{\ttfamily \#include $<$sys/reboot.\+h$>$}\newline
+{\ttfamily \#include $<$net/golioth/fw.\+h$>$}\newline
+{\ttfamily \#include "{}flash.\+h"{}}\newline
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structdfu__ctx}{dfu\+\_\+ctx}}
+\begin{DoxyCompactList}\small\item\em Structure for firmware update context. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{main_8c_a266a456108689c3ec05f87a4b8c76979}{REBOOT\+\_\+\+DELAY\+\_\+\+SEC}}~1
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{main_8c_ab67de456f12d9ba280fa7779e9a8f9a3}{LOG\+\_\+\+MODULE\+\_\+\+REGISTER}} (golioth\+\_\+lightdb\+\_\+stream, LOG\+\_\+\+LEVEL\+\_\+\+DBG)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{main_8c_a266a456108689c3ec05f87a4b8c76979}\label{main_8c_a266a456108689c3ec05f87a4b8c76979} 
+\index{main.c@{main.c}!REBOOT\_DELAY\_SEC@{REBOOT\_DELAY\_SEC}}
+\index{REBOOT\_DELAY\_SEC@{REBOOT\_DELAY\_SEC}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{REBOOT\_DELAY\_SEC}{REBOOT\_DELAY\_SEC}}
+{\footnotesize\ttfamily \#define REBOOT\+\_\+\+DELAY\+\_\+\+SEC~1}
+
+
+
+Definition at line \mbox{\hyperlink{main_8c_source_l00031}{31}} of file \mbox{\hyperlink{main_8c_source}{main.\+c}}.
+
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{main_8c_ab67de456f12d9ba280fa7779e9a8f9a3}\label{main_8c_ab67de456f12d9ba280fa7779e9a8f9a3} 
+\index{main.c@{main.c}!LOG\_MODULE\_REGISTER@{LOG\_MODULE\_REGISTER}}
+\index{LOG\_MODULE\_REGISTER@{LOG\_MODULE\_REGISTER}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{LOG\_MODULE\_REGISTER()}{LOG\_MODULE\_REGISTER()}}
+{\footnotesize\ttfamily LOG\+\_\+\+MODULE\+\_\+\+REGISTER (\begin{DoxyParamCaption}\item[{golioth\+\_\+lightdb\+\_\+stream}]{,  }\item[{LOG\+\_\+\+LEVEL\+\_\+\+DBG}]{ }\end{DoxyParamCaption})}
+

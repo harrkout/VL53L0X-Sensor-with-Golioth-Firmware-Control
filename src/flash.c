@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @file
+ * @brief Golioth Device Firmware Update (DFU) module
+ */
+
 #include <logging/log.h>
 LOG_MODULE_DECLARE(golioth_dfu);
 
@@ -23,162 +28,191 @@ LOG_MODULE_DECLARE(golioth_dfu);
 #endif
 #endif /* CONFIG_TRUSTED_EXECUTION_NONSECURE */
 
+/**
+ * @brief String to store the current firmware version
+ */
 char current_version_str[sizeof("255.255.65535")];
 
+/**
+ * @brief Initializes the current firmware version string
+ *
+ * @param dev Unused parameter (required by Zephyr SYS_INIT macro)
+ * @return 0 on success, negative error code on failure
+ */
 static int current_version_init(const struct device *dev)
 {
-	struct mcuboot_img_header hdr;
-	int written;
-	int err;
+    struct mcuboot_img_header hdr;
+    int written;
+    int err;
 
-	err = boot_read_bank_header(FLASH_AREA_IMAGE_PRIMARY, &hdr, sizeof(hdr));
-	if (err) {
-		LOG_ERR("Failed to read primary area (%u) header: %d",
-			FLASH_AREA_IMAGE_PRIMARY, err);
-		return err;
-	}
+    err = boot_read_bank_header(FLASH_AREA_IMAGE_PRIMARY, &hdr, sizeof(hdr));
+    if (err) {
+        LOG_ERR("Failed to read primary area (%u) header: %d",
+                FLASH_AREA_IMAGE_PRIMARY, err);
+        return err;
+    }
 
-	written = snprintf(current_version_str, sizeof(current_version_str),
-			   "%u.%u.%u",
-			   (unsigned int) hdr.h.v1.sem_ver.major,
-			   (unsigned int) hdr.h.v1.sem_ver.minor,
-			   (unsigned int) hdr.h.v1.sem_ver.revision);
-	if (written >= sizeof(current_version_str)) {
-		LOG_ERR("Version string is too long!");
-		current_version_str[0] = '\0';
-		return -ENOMEM;
-	}
+    written = snprintf(current_version_str, sizeof(current_version_str),
+                       "%u.%u.%u",
+                       (unsigned int)hdr.h.v1.sem_ver.major,
+                       (unsigned int)hdr.h.v1.sem_ver.minor,
+                       (unsigned int)hdr.h.v1.sem_ver.revision);
+    if (written >= sizeof(current_version_str)) {
+        LOG_ERR("Version string is too long!");
+        current_version_str[0] = '\0';
+        return -ENOMEM;
+    }
 
-	return 0;
+    return 0;
 }
 
 SYS_INIT(current_version_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
 
-/*
- * @note This is a copy of ERASED_VAL_32() from mcumgr.
+/**
+ * @brief Macro to create a 32-bit value with all bytes set to a given value
  */
 #define ERASED_VAL_32(x) (((x) << 24) | ((x) << 16) | ((x) << 8) | (x))
 
 /**
- * Determines if the specified area of flash is completely unwritten.
+ * @brief Determines if the specified area of flash is completely unwritten.
  *
- * @note This is a copy of zephyr_img_mgmt_flash_check_empty() from mcumgr.
+ * @param fa Flash area to check
+ * @param[out] out_empty True if the area is empty, false otherwise
+ * @return 0 on success, negative error code on failure
  */
 static int flash_area_check_empty(const struct flash_area *fa,
-				  bool *out_empty)
+                                  bool *out_empty)
 {
-	uint32_t data[16];
-	off_t addr;
-	off_t end;
-	int bytes_to_read;
-	int rc;
-	int i;
-	uint8_t erased_val;
-	uint32_t erased_val_32;
+    uint32_t data[16];
+    off_t addr;
+    off_t end;
+    int bytes_to_read;
+    int rc;
+    int i;
+    uint8_t erased_val;
+    uint32_t erased_val_32;
 
-	__ASSERT_NO_MSG(fa->fa_size % 4 == 0);
+    __ASSERT_NO_MSG(fa->fa_size % 4 == 0);
 
-	erased_val = flash_area_erased_val(fa);
-	erased_val_32 = ERASED_VAL_32(erased_val);
+    erased_val = flash_area_erased_val(fa);
+    erased_val_32 = ERASED_VAL_32(erased_val);
 
-	end = fa->fa_size;
-	for (addr = 0; addr < end; addr += sizeof(data)) {
-		if (end - addr < sizeof(data)) {
-			bytes_to_read = end - addr;
-		} else {
-			bytes_to_read = sizeof(data);
-		}
+    end = fa->fa_size;
+    for (addr = 0; addr < end; addr += sizeof(data)) {
+        if (end - addr < sizeof(data)) {
+            bytes_to_read = end - addr;
+        } else {
+            bytes_to_read = sizeof(data);
+        }
 
-		rc = flash_area_read(fa, addr, data, bytes_to_read);
-		if (rc != 0) {
-			flash_area_close(fa);
-			return rc;
-		}
+        rc = flash_area_read(fa, addr, data, bytes_to_read);
+        if (rc != 0) {
+            flash_area_close(fa);
+            return rc;
+        }
 
-		for (i = 0; i < bytes_to_read / 4; i++) {
-			if (data[i] != erased_val_32) {
-				*out_empty = false;
-				flash_area_close(fa);
-				return 0;
-			}
-		}
-	}
+        for (i = 0; i < bytes_to_read / 4; i++) {
+            if (data[i] != erased_val_32) {
+                *out_empty = false;
+                flash_area_close(fa);
+                return 0;
+            }
+        }
+    }
 
-	*out_empty = true;
+    *out_empty = true;
 
-	return 0;
+    return 0;
 }
 
+/**
+ * @brief Checks if the flash image area needs to be erased and performs the erase if necessary
+ *
+ * @param ctx Flash image context
+ * @return 0 on success, negative error code on failure
+ */
 static int flash_img_erase_if_needed(struct flash_img_context *ctx)
 {
-	bool empty;
-	int err;
+    bool empty;
+    int err;
 
-	if (IS_ENABLED(CONFIG_IMG_ERASE_PROGRESSIVELY)) {
-		return 0;
-	}
+    if (IS_ENABLED(CONFIG_IMG_ERASE_PROGRESSIVELY)) {
+        return 0;
+    }
 
-	err = flash_area_check_empty(ctx->flash_area, &empty);
-	if (err) {
-		return err;
-	}
+    err = flash_area_check_empty(ctx->flash_area, &empty);
+    if (err) {
+        return err;
+    }
 
-	if (empty) {
-		return 0;
-	}
+    if (empty) {
+        return 0;
+    }
 
-	err = flash_area_erase(ctx->flash_area, 0, ctx->flash_area->fa_size);
-	if (err) {
-		return err;
-	}
+    err = flash_area_erase(ctx->flash_area, 0, ctx->flash_area->fa_size);
+    if (err) {
+        return err;
+    }
 
-	return 0;
+    return 0;
 }
 
+/**
+ * @brief Converts swap type to a string representation
+ *
+ * @param swap_type Swap type to convert
+ * @return String representation of the swap type
+ */
 static const char *swap_type_str(int swap_type)
 {
-	switch (swap_type) {
-	case BOOT_SWAP_TYPE_NONE:
-		return "none";
-	case BOOT_SWAP_TYPE_TEST:
-		return "test";
-	case BOOT_SWAP_TYPE_PERM:
-		return "perm";
-	case BOOT_SWAP_TYPE_REVERT:
-		return "revert";
-	case BOOT_SWAP_TYPE_FAIL:
-		return "fail";
-	}
+    switch (swap_type) {
+    case BOOT_SWAP_TYPE_NONE:
+        return "none";
+    case BOOT_SWAP_TYPE_TEST:
+        return "test";
+    case BOOT_SWAP_TYPE_PERM:
+        return "perm";
+    case BOOT_SWAP_TYPE_REVERT:
+        return "revert";
+    case BOOT_SWAP_TYPE_FAIL:
+        return "fail";
+    }
 
-	return "unknown";
+    return "unknown";
 }
 
+/**
+ * @brief Prepares the flash image for an update
+ *
+ * @param flash Flash image context
+ * @return 0 on success, negative error code on failure
+ */
 int flash_img_prepare(struct flash_img_context *flash)
 {
-	int swap_type;
-	int err;
+    int swap_type;
+    int err;
 
-	swap_type = mcuboot_swap_type();
-	switch (swap_type) {
-	case BOOT_SWAP_TYPE_REVERT:
-		LOG_WRN("'revert' swap type detected, it is not safe to continue");
-		return -EBUSY;
-	default:
-		LOG_INF("swap type: %s", swap_type_str(swap_type));
-		break;
-	}
+    swap_type = mcuboot_swap_type();
+    switch (swap_type) {
+    case BOOT_SWAP_TYPE_REVERT:
+        LOG_WRN("'revert' swap type detected, it is not safe to continue");
+        return -EBUSY;
+    default:
+        LOG_INF("swap type: %s", swap_type_str(swap_type));
+        break;
+    }
 
-	err = flash_img_init(flash);
-	if (err) {
-		LOG_ERR("failed to init: %d", err);
-		return err;
-	}
+    err = flash_img_init(flash);
+    if (err) {
+        LOG_ERR("failed to init: %d", err);
+        return err;
+    }
 
-	err = flash_img_erase_if_needed(flash);
-	if (err) {
-		LOG_ERR("failed to erase: %d", err);
-		return err;
-	}
+    err = flash_img_erase_if_needed(flash);
+    if (err) {
+        LOG_ERR("failed to erase: %d", err);
+        return err;
+    }
 
-	return 0;
+    return 0;
 }

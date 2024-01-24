@@ -1,0 +1,170 @@
+\doxysection{main.\+c}
+\hypertarget{main_8c_source}{}\label{main_8c_source}\index{src/main.c@{src/main.c}}
+\mbox{\hyperlink{main_8c}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00001}00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00002}00002\ \textcolor{comment}{\ *\ @file\ main.c}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00003}00003\ \textcolor{comment}{\ *\ @brief\ Golioth\ LightDB\ Stream\ of\ Time-\/of-\/Flight\ Sensor}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00004}00004\ \textcolor{comment}{\ *\ @date\ 01/06/22}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00005}00005\ \textcolor{comment}{\ *\ @author\ Harry\ Koutsourelakis}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00006}00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00007}00007\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00008}00008\ \textcolor{comment}{//\ Golioth's\ header\ files}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00009}00009\ \textcolor{preprocessor}{\#include\ <logging/log.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00010}\mbox{\hyperlink{main_8c_ab67de456f12d9ba280fa7779e9a8f9a3}{00010}}\ \mbox{\hyperlink{main_8c_ab67de456f12d9ba280fa7779e9a8f9a3}{LOG\_MODULE\_REGISTER}}(golioth\_lightdb\_stream,\ LOG\_LEVEL\_DBG);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00011}00011\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00012}00012\ \textcolor{preprocessor}{\#include\ <net/coap.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00013}00013\ \textcolor{preprocessor}{\#include\ <net/golioth/system\_client.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00014}00014\ \textcolor{preprocessor}{\#include\ <net/golioth/wifi.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00015}00015\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00016}00016\ \textcolor{preprocessor}{\#include\ <drivers/sensor.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00017}00017\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00018}00018\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00019}00019\ \textcolor{comment}{//\ VL53L0X\ header\ files}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00020}00020\ \textcolor{preprocessor}{\#include\ <zephyr.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00021}00021\ \textcolor{preprocessor}{\#include\ <device.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00022}00022\ \textcolor{preprocessor}{\#include\ <drivers/sensor.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00023}00023\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00024}00024\ \textcolor{preprocessor}{\#include\ <sys/printk.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00025}00025\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00026}00026\ \textcolor{comment}{//\ MCUboot}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00027}00027\ \textcolor{preprocessor}{\#include\ <sys/reboot.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00028}00028\ \textcolor{preprocessor}{\#include\ <net/golioth/fw.h>}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00029}00029\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{flash_8h}{flash.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00030}00030\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00031}\mbox{\hyperlink{main_8c_a266a456108689c3ec05f87a4b8c76979}{00031}}\ \textcolor{preprocessor}{\#define\ REBOOT\_DELAY\_SEC\ 1}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00032}00032\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00037}\mbox{\hyperlink{structdfu__ctx}{00037}}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structdfu__ctx}{dfu\_ctx}}\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00038}\mbox{\hyperlink{structdfu__ctx_a36c48c9274b54f87e1cba45c02992ada}{00038}}\ \ \ \ \ \textcolor{keyword}{struct\ }golioth\_fw\_download\_ctx\ \mbox{\hyperlink{structdfu__ctx_a36c48c9274b54f87e1cba45c02992ada}{fw\_ctx}};\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00039}\mbox{\hyperlink{structdfu__ctx_a4c2e1ac968f1f8365590a078a9bc54dc}{00039}}\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structflash__img__context}{flash\_img\_context}}\ \mbox{\hyperlink{structdfu__ctx_a4c2e1ac968f1f8365590a078a9bc54dc}{flash}};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00040}\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{00040}}\ \ \ \ \ \textcolor{keywordtype}{char}\ \mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}}[65];\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00041}00041\ \};}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00042}00042\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00043}00043\ \textcolor{keyword}{static}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structdfu__ctx}{dfu\_ctx}}\ update\_ctx;\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00044}00044\ \textcolor{keyword}{static}\ \textcolor{keyword}{enum}\ golioth\_dfu\_result\ dfu\_initial\_result\ =\ GOLIOTH\_DFU\_RESULT\_INITIAL;\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00055}00055\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ data\_received(\textcolor{keyword}{struct}\ golioth\_blockwise\_download\_ctx\ *ctx,\ \textcolor{keyword}{const}\ uint8\_t\ *data,\ \textcolor{keywordtype}{size\_t}\ offset,\ \textcolor{keywordtype}{size\_t}\ len,\ \textcolor{keywordtype}{bool}\ last)}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00056}00056\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00057}00057\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structdfu__ctx}{dfu\_ctx}}\ *dfu\ =\ CONTAINER\_OF(ctx,\ \textcolor{keyword}{struct}\ \mbox{\hyperlink{structdfu__ctx}{dfu\_ctx}},\ \mbox{\hyperlink{structdfu__ctx_a36c48c9274b54f87e1cba45c02992ada}{fw\_ctx}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00058}00058\ \ \ \ \ \textcolor{keywordtype}{int}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00059}00059\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00060}00060\ \ \ \ \ LOG\_DBG(\textcolor{stringliteral}{"{}Received\ \%zu\ bytes\ at\ offset\ \%zu\%s"{}},\ len,\ offset,\ last\ ?\ \textcolor{stringliteral}{"{}\ (last)"{}}\ :\ \textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00061}00061\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00062}00062\ \ \ \ \ \textcolor{keywordflow}{if}\ (offset\ ==\ 0)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00063}00063\ \ \ \ \ \ \ \ \ err\ =\ \mbox{\hyperlink{flash_8c_a62677ad18a8efbfd7867fcbb060f50a9}{flash\_img\_prepare}}(\&dfu-\/>\mbox{\hyperlink{structdfu__ctx_a4c2e1ac968f1f8365590a078a9bc54dc}{flash}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00064}00064\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00065}00065\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00066}00066\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00067}00067\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00068}00068\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00069}00069\ \ \ \ \ err\ =\ flash\_img\_buffered\_write(\&dfu-\/>\mbox{\hyperlink{structdfu__ctx_a4c2e1ac968f1f8365590a078a9bc54dc}{flash}},\ data,\ len,\ last);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00070}00070\ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00071}00071\ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}Failed\ to\ write\ to\ flash:\ \%d"{}},\ err);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00072}00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00073}00073\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00074}00074\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00075}00075\ \ \ \ \ \textcolor{keywordflow}{if}\ (offset\ >\ 0\ \&\&\ last)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00076}00076\ \ \ \ \ \ \ \ \ err\ =\ golioth\_fw\_report\_state(client,\ \textcolor{stringliteral}{"{}main"{}},\ \mbox{\hyperlink{flash_8c_a1ac73c01498e899b01a94c526d147585}{current\_version\_str}},\ dfu-\/>\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}},\ GOLIOTH\_FW\_STATE\_DOWNLOADED,\ GOLIOTH\_DFU\_RESULT\_INITIAL);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00077}00077\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00078}00078\ \ \ \ \ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}Failed\ to\ update\ to\ '\%s'\ state:\ \%d"{}},\ \textcolor{stringliteral}{"{}downloaded"{}},\ err);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00079}00079\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00080}00080\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00081}00081\ \ \ \ \ \ \ \ \ err\ =\ golioth\_fw\_report\_state(client,\ \textcolor{stringliteral}{"{}main"{}},\ \mbox{\hyperlink{flash_8c_a1ac73c01498e899b01a94c526d147585}{current\_version\_str}},\ dfu-\/>\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}},\ GOLIOTH\_FW\_STATE\_UPDATING,\ GOLIOTH\_DFU\_RESULT\_INITIAL);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00082}00082\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00083}00083\ \ \ \ \ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}Failed\ to\ update\ to\ '\%s'\ state:\ \%d"{}},\ \textcolor{stringliteral}{"{}updating"{}},\ err);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00084}00084\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00085}00085\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00086}00086\ \ \ \ \ \ \ \ \ LOG\_INF(\textcolor{stringliteral}{"{}Requesting\ upgrade"{}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00087}00087\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00088}00088\ \ \ \ \ \ \ \ \ err\ =\ boot\_request\_upgrade(\mbox{\hyperlink{flash_8h_a9ed69fcd1ebf57cc356ce2bb835853f7}{BOOT\_UPGRADE\_TEST}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00089}00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00090}00090\ \ \ \ \ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}Failed\ to\ request\ upgrade:\ \%d"{}},\ err);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00091}00091\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00092}00092\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00093}00093\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00094}00094\ \ \ \ \ \ \ \ \ LOG\_INF(\textcolor{stringliteral}{"{}Rebooting\ in\ \%d\ second(s)"{}},\ \mbox{\hyperlink{main_8c_a266a456108689c3ec05f87a4b8c76979}{REBOOT\_DELAY\_SEC}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00095}00095\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00096}00096\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Synchronize\ logs\ */}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00097}00097\ \ \ \ \ \ \ \ \ LOG\_PANIC();}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00098}00098\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00099}00099\ \ \ \ \ \ \ \ \ k\_sleep(K\_SECONDS(\mbox{\hyperlink{main_8c_a266a456108689c3ec05f87a4b8c76979}{REBOOT\_DELAY\_SEC}}));}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00100}00100\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00101}00101\ \ \ \ \ \ \ \ \ sys\_reboot(SYS\_REBOOT\_COLD);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00102}00102\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00103}00103\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00104}00104\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00105}00105\ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00106}00106\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00113}00113\ \textcolor{keyword}{static}\ uint8\_t\ *uri\_strip\_leading\_slash(uint8\_t\ *uri,\ \textcolor{keywordtype}{size\_t}\ *uri\_len)}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00114}00114\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00115}00115\ \ \ \ \ \textcolor{keywordflow}{if}\ (*uri\_len\ >\ 0\ \&\&\ uri[0]\ ==\ \textcolor{charliteral}{'/'})\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00116}00116\ \ \ \ \ \ \ \ \ (*uri\_len)-\/-\/;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00117}00117\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ \&uri[1];}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00118}00118\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00119}00119\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00120}00120\ \ \ \ \ \textcolor{keywordflow}{return}\ uri;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00121}00121\ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00122}00122\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00130}00130\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ golioth\_desired\_update(\textcolor{keyword}{const}\ \textcolor{keyword}{struct}\ coap\_packet\ *update,\ \textcolor{keyword}{struct}\ coap\_reply\ *reply,\ \textcolor{keyword}{const}\ \textcolor{keyword}{struct}\ sockaddr\ *from)}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00131}00131\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00132}00132\ \ \ \ \ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structdfu__ctx}{dfu\_ctx}}\ *dfu\ =\ \&update\_ctx;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00133}00133\ \ \ \ \ \textcolor{keyword}{struct\ }coap\_reply\ *fw\_reply;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00134}00134\ \ \ \ \ \textcolor{keyword}{const}\ uint8\_t\ *payload;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00135}00135\ \ \ \ \ uint16\_t\ payload\_len;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00136}00136\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ version\_len\ =\ \textcolor{keyword}{sizeof}(dfu-\/>\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}})\ -\/\ 1;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00137}00137\ \ \ \ \ uint8\_t\ uri[64];}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00138}00138\ \ \ \ \ uint8\_t\ *uri\_p;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00139}00139\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ uri\_len\ =\ \textcolor{keyword}{sizeof}(uri);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00140}00140\ \ \ \ \ \textcolor{keywordtype}{int}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00141}00141\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00142}00142\ \ \ \ \ payload\ =\ coap\_packet\_get\_payload(update,\ \&payload\_len);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00143}00143\ \ \ \ \ \textcolor{keywordflow}{if}\ (!payload)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00144}00144\ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}No\ payload\ in\ CoAP!"{}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00145}00145\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/EIO;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00146}00146\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00147}00147\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00148}00148\ \ \ \ \ LOG\_HEXDUMP\_DBG(payload,\ payload\_len,\ \textcolor{stringliteral}{"{}Desired"{}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00149}00149\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00150}00150\ \ \ \ \ err\ =\ golioth\_fw\_desired\_parse(payload,\ payload\_len,\ dfu-\/>\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}},\ \&version\_len,\ uri,\ \&uri\_len);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00151}00151\ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00152}00152\ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}Failed\ to\ parse\ desired\ version:\ \%d"{}},\ err);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00153}00153\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00154}00154\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00155}00155\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00156}00156\ \ \ \ \ dfu-\/>\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}}[version\_len]\ =\ \textcolor{charliteral}{'\(\backslash\)0'};}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00157}00157\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00158}00158\ \ \ \ \ \textcolor{keywordflow}{if}\ (version\_len\ ==\ strlen(\mbox{\hyperlink{flash_8c_a1ac73c01498e899b01a94c526d147585}{current\_version\_str}})\ \&\&\ !strncmp(\mbox{\hyperlink{flash_8c_a1ac73c01498e899b01a94c526d147585}{current\_version\_str}},\ dfu-\/>\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}},\ version\_len))\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00159}00159\ \ \ \ \ \ \ \ \ LOG\_INF(\textcolor{stringliteral}{"{}Desired\ version\ (\%s)\ matches\ current\ firmware\ version!"{}},\ log\_strdup(\mbox{\hyperlink{flash_8c_a1ac73c01498e899b01a94c526d147585}{current\_version\_str}}));}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00160}00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/EALREADY;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00161}00161\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00162}00162\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00163}00163\ \ \ \ \ fw\_reply\ =\ coap\_reply\_next\_unused(coap\_replies,\ ARRAY\_SIZE(coap\_replies));}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00164}00164\ \ \ \ \ \textcolor{keywordflow}{if}\ (!reply)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00165}00165\ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}No\ more\ reply\ handlers"{}});}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00166}00166\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ -\/ENOMEM;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00167}00167\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00168}00168\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00169}00169\ \ \ \ \ uri\_p\ =\ uri\_strip\_leading\_slash(uri,\ \&uri\_len);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00170}00170\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00171}00171\ \ \ \ \ err\ =\ golioth\_fw\_report\_state(client,\ \textcolor{stringliteral}{"{}main"{}},\ \mbox{\hyperlink{flash_8c_a1ac73c01498e899b01a94c526d147585}{current\_version\_str}},\ dfu-\/>\mbox{\hyperlink{structdfu__ctx_a0582cae0a260227d79714c43981129a8}{version}},\ GOLIOTH\_FW\_STATE\_DOWNLOADING,\ GOLIOTH\_DFU\_RESULT\_INITIAL);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00172}00172\ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00173}00173\ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}Failed\ to\ update\ to\ '\%s'\ state:\ \%d"{}},\ \textcolor{stringliteral}{"{}downloading"{}},\ err);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00174}00174\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00175}00175\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00176}00176\ \ \ \ \ err\ =\ golioth\_fw\_download(client,\ \&dfu-\/>\mbox{\hyperlink{structdfu__ctx_a36c48c9274b54f87e1cba45c02992ada}{fw\_ctx}},\ uri\_p,\ uri\_len,\ fw\_reply,\ data\_received);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00177}00177\ \ \ \ \ \textcolor{keywordflow}{if}\ (err)\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00178}00178\ \ \ \ \ \ \ \ \ LOG\_ERR(\textcolor{stringliteral}{"{}Failed\ to\ request\ firmware:\ \%d"{}},\ err);}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00179}00179\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00180}00180\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00181}00181\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00182}00182\ \ \ \ \ \textcolor{keywordflow}{return}\ 0;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00183}00183\ \}}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00184}00184\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00189}00189\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ golioth\_on\_connect(\textcolor{keyword}{struct}\ golioth\_client\ *client)}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00190}00190\ \{}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00191}00191\ \ \ \ \ \textcolor{keyword}{struct\ }coap\_reply\ *reply;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00192}00192\ \ \ \ \ \textcolor{keywordtype}{int}\ err;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00193}00193\ \ \ \ \ \textcolor{keywordtype}{int}\ i;}
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00194}00194\ }
+\DoxyCodeLine{\Hypertarget{main_8c_source_l00195}00195\ \ \ \ \ err\ =\ golioth\_fw\_report\_state(client,\ \textcolor{stringliteral}{"{}main"{}},\ \mbox{\hyperlink{flash_8c_a1ac73c01498e899b01a94c526d147585}{current\_version\_str}},\ NULL,\ G}
+
+\end{DoxyCode}
